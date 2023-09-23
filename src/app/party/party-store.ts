@@ -1,9 +1,4 @@
-import {
-  GameState,
-  PartykitServerMessage,
-  type ChatMessage,
-  type ChatMessages,
-} from "@/partykit/server";
+import { GameState, PartykitServerMessage } from "@/server/partykit/server";
 import { makeAutoObservable } from "mobx";
 
 export class Party {
@@ -11,27 +6,18 @@ export class Party {
     makeAutoObservable(this);
   }
 
-  messages: ChatMessages = [];
-
   gameState: GameState = { status: "waiting" };
 
   handleMessage(message: PartykitServerMessage) {
     console.log("handleMessage, message: ", message);
 
     switch (message.type) {
-      case "chat":
-        this.messages = message.payload;
-        break;
-      case "status":
+      case "gameState":
         this.gameState = message.payload;
         break;
       default:
         console.error("Unexpected message:", message);
     }
-  }
-
-  optimisticallyAddMessage(message: ChatMessage) {
-    this.messages.unshift(message);
   }
 }
 
