@@ -13,7 +13,7 @@ export class Party {
 
   messages: ChatMessages = [];
 
-  status: GameState = { status: "waiting" };
+  gameState: GameState = { status: "waiting" };
 
   handleMessage(message: PartykitServerMessage) {
     console.log("handleMessage, message: ", message);
@@ -23,7 +23,7 @@ export class Party {
         this.messages = message.payload;
         break;
       case "status":
-        this.status = message.payload;
+        this.gameState = message.payload;
         break;
       default:
         console.error("Unexpected message:", message);

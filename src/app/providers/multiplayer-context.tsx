@@ -26,9 +26,10 @@ export function MultiplayerContextProvider(props: {
 }) {
   const socket = usePartySocket({
     host: PARTY_HOST, // TODO: don't hardcode
-    //party: "youtube-party",
+    //party: "youtube-party", // TODO: what does this do?
     room: PARTY_ROOM,
     onMessage: (message) => {
+      // todo: maybe safely parse?
       const parsedMessageData = JSON.parse(message.data);
       party.handleMessage(parsedMessageData as PartykitServerMessage);
     },

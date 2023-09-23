@@ -26,7 +26,13 @@ const messageSchema = z.discriminatedUnion("type", [
   }),
 ]);
 
-type Cat = { id: string; url: string; votes: Array<string> };
+type Cat = {
+  id: string;
+  url: string;
+  votes: Array<string>;
+  width: number;
+  height: number;
+};
 type Cats = Record<"a" | "b", Cat>;
 type Winner = "a" | "b" | "tie";
 type Round = { id: string; startTime: number; endTime: number };
@@ -256,7 +262,7 @@ export default class CatMashServer implements Party.Server {
 
     setTimeout(() => {
       this.showRoundResults();
-    }, TIMES.WAITING_LENGTH);
+    }, TIMES.ROUND_LENGTH);
   }
 
   async showRoundResults() {
@@ -295,13 +301,17 @@ export default class CatMashServer implements Party.Server {
     return {
       a: {
         id: parsedCats[0].id,
-        url: parsedCats[0].url,
         votes: [],
+        url: parsedCats[0].url,
+        width: parsedCats[0].width,
+        height: parsedCats[0].height,
       },
       b: {
         id: parsedCats[1].id,
-        url: parsedCats[1].url,
         votes: [],
+        url: parsedCats[1].url,
+        width: parsedCats[1].width,
+        height: parsedCats[1].height,
       },
     };
   }
