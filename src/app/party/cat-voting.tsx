@@ -1,3 +1,6 @@
+/* for the sake of my vercel bill */
+/* eslint-disable @next/next/no-img-element */
+
 "use client";
 
 import { observer } from "mobx-react-lite";
@@ -35,10 +38,19 @@ export const CatVoting = observer(function CatVoting() {
     const cats = party.gameState.cats;
 
     const endTime = party.gameState.round.endTime;
+    const totalVotes = cats.a.votes.length + cats.b.votes.length;
 
     return (
-      <div className="flex flex-col gap-4">
-        <TimeRemaining endTime={endTime} />
+      <div className="flex flex-col gap-4 items-center justify-center mx-4 w-10/12">
+        <img
+          src="/img/cats-header.png"
+          alt="cats header"
+          width={305}
+          height={85}
+          style={{ imageRendering: "pixelated" }}
+        />
+        <TimeRemaining endTime={endTime} totalVotes={totalVotes} />
+        <p></p>
 
         <div className="flex gap-4">
           {(["a", "b"] as const).map((catId) => {
@@ -46,22 +58,19 @@ export const CatVoting = observer(function CatVoting() {
 
             return (
               <div key={catId} className="flex flex-col gap-2">
-                <h2>{catId === "a" ? "Vote for me" : "Nooooo vote for me"}</h2>
-                {/* for the sake of my vercel bill */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <h2></h2>
                 <img
                   src={cat.url}
                   alt={`cat-${cat.id}`}
                   width={cat.width}
                   height={cat.height}
                 />
-                <p>votes: {cat.votes.length}</p>
                 <button
                   className="bg-yellow-200 text-black p-2"
                   value={cat.id}
                   onClick={() => handleVote(catId)}
                 >
-                  Vote for me
+                  {catId === "a" ? "Pick me" : "Nooooo pick me"}
                 </button>
               </div>
             );

@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function TimeRemaining({ endTime }: { endTime: number }) {
+export function TimeRemaining({
+  endTime,
+  totalVotes,
+}: {
+  endTime: number;
+  totalVotes: number;
+}) {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
@@ -19,5 +25,10 @@ export function TimeRemaining({ endTime }: { endTime: number }) {
 
   const secondsRemaining = Math.max(0, Math.floor(timeRemaining / 1000));
 
-  return <p>{secondsRemaining} seconds remaining</p>;
+  return (
+    <p>
+      {totalVotes} vote{totalVotes !== 1 && "s"}. {secondsRemaining} seconds
+      remaining.
+    </p>
+  );
 }
