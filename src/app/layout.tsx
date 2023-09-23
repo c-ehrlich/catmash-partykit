@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="flex flex-col items-center w-screen h-screen overflow-scroll py-8 bg-green-400 relative"
+      className="flex flex-col items-center justify-center w-screen h-screen overflow-scroll py-8 bg-green-400 relative"
     >
       <MultiplayerContextProvider>
         <body className="flex flex-col items-center">{children}</body>

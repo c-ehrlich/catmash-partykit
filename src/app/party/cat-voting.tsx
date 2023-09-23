@@ -9,8 +9,9 @@ import { party } from "./party-store";
 import Image from "next/image";
 import { ValidMessage } from "@/server/partykit/server";
 import { TimeRemaining } from "./time-remaining";
+import Link from "next/link";
 
-export const CatVoting = observer(function CatVoting() {
+const CatVoting = observer(function CatVoting() {
   const { socket } = useMultiplayer();
 
   if (!socket) {
@@ -40,6 +41,9 @@ export const CatVoting = observer(function CatVoting() {
     const endTime = party.gameState.round.endTime;
     const totalVotes = cats.a.votes.length + cats.b.votes.length;
 
+    const playerHasVotes =
+      cats.a.votes.includes(socket.id) || cats.b.votes.includes(socket.id);
+
     return (
       <div className="flex flex-col gap-4 items-center justify-center mx-4 w-10/12">
         <img
@@ -49,33 +53,58 @@ export const CatVoting = observer(function CatVoting() {
           height={85}
           style={{ imageRendering: "pixelated" }}
         />
-        <TimeRemaining endTime={endTime} totalVotes={totalVotes} />
-        <p></p>
 
-        <div className="flex gap-4">
+        <h1 className="text-5xl font-bold text-red-600 text-center">
+          Which cat is cuter?
+        </h1>
+
+        <TimeRemaining endTime={endTime} totalVotes={totalVotes} />
+
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-center w-full">
           {(["a", "b"] as const).map((catId) => {
             const cat = cats[catId];
+            const playerVotedForCat = cat.votes.includes(socket.id);
 
             return (
-              <div key={catId} className="flex flex-col gap-2">
-                <h2></h2>
-                <img
-                  src={cat.url}
-                  alt={`cat-${cat.id}`}
-                  width={cat.width}
-                  height={cat.height}
-                />
+              <div
+                key={catId}
+                className={`flex flex-col gap-4 items-center p-4 ${
+                  playerVotedForCat ? "bg-green-700" : "bg-green-500"
+                } rounded-lg w-full max-w-sm`}
+              >
+                <div className="flex items-center justify-center aspect-square w-full bg-transparent rounded-md overflow-hidden">
+                  <div className="flex align-center items-center w-full h-full">
+                    <img
+                      className="object-fill rounded-md"
+                      src={cat.url}
+                      alt={`cat-${cat.id}`}
+                      width={cat.width}
+                      height={cat.height}
+                    />
+                  </div>
+                </div>
                 <button
-                  className="bg-yellow-200 text-black p-2"
+                  className="bg-yellow-300 hover:bg-yellow-400 text-xl text-yellow-800 font-bold py-2 px-4 rounded"
                   value={cat.id}
                   onClick={() => handleVote(catId)}
                 >
-                  {catId === "a" ? "Pick me" : "Nooooo pick me"}
+                  {playerVotedForCat
+                    ? "Thx!!!"
+                    : playerHasVotes
+                    ? "Its ok im not upset"
+                    : catId === "a"
+                    ? "Pick me"
+                    : "Nooooo pick me"}
                 </button>
               </div>
             );
           })}
         </div>
+        <span className="flex gap-2 text-sky-600 font-bold">
+          <Link href="/cutest-cats">Cutest Cats</Link>
+          <span className="font-light">/</span>
+          <Link href="/about">About</Link>
+        </span>
       </div>
     );
   }
@@ -99,16 +128,17 @@ export const CatVoting = observer(function CatVoting() {
         : party.gameState.cats.a;
 
     return (
-      <div>
-        <h1>Winner!</h1>
+      <div className="flex flex-col gap-4 items-center">
+        <h1 className="text-5xl font-bold text-red-600 text-center">
+          Winner Winner Chicken Dinner
+        </h1>
         <Image
           src={winner.url}
           alt={`cat-${winner.id}`}
           width={winner.width}
           height={winner.height}
         />
-        <p>
-          {" "}
+        <p className="text-center font-bold text-blue-800 text-xl">
           Won {winner.votes.length}:{loser.votes.length}
         </p>
       </div>
@@ -117,3 +147,5 @@ export const CatVoting = observer(function CatVoting() {
 
   return <div>{JSON.stringify(party.gameState)}</div>;
 });
+
+export default CatVoting;

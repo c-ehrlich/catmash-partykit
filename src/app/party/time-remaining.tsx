@@ -26,7 +26,7 @@ export function TimeRemaining({
   const secondsRemaining = Math.max(0, Math.floor(timeRemaining / 1000));
 
   return (
-    <p>
+    <p className="text-purple-600 text-xl text-bold">
       {totalVotes} vote{totalVotes !== 1 && "s"}. {secondsRemaining} seconds
       remaining.
     </p>

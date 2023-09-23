@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 
-const NoSsrParty = dynamic(() => import("./party/no-ssr-party"), {
+const NoSSRCatVoting = dynamic(() => import("./party/cat-voting"), {
   ssr: false,
 });
 
 export default function Home() {
-  return <NoSsrParty />;
+  return <NoSSRCatVoting />;
 }
