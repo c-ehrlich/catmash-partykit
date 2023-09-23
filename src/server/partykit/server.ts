@@ -2,9 +2,10 @@ import type * as Party from "partykit/server";
 import { z } from "zod";
 import { produce } from "immer";
 import { getCatPair } from "../util/getCatPair";
-// import { db } from "../db/drizzle";
-// import { cat } from "../db/schema";
-// import { updateCatStats } from "../util/updateCatStats";
+import { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
+import * as schema from "../db/schema";
+import { updateCatStats } from "../util/updateCatStats";
+import { createDrizzle } from "../db/drizzle";
 
 const messageSchema = z.discriminatedUnion("type", [
   z.object({
@@ -30,7 +31,7 @@ type Round = { id: string; startTime: number; endTime: number };
 export type GameState =
   | { status: "waiting for initial server connection" }
   | {
-      status: "waiting";
+      status: "initializing";
     }
   | {
       status: "voting";
@@ -63,8 +64,16 @@ export default class CatMashServer implements Party.Server {
 
   gameState: GameState;
 
+  db: PlanetScaleDatabase<typeof schema>;
+
   constructor(readonly party: Party.Party) {
-    this.gameState = { status: "waiting" };
+    this.gameState = { status: "initializing" };
+
+    if (!party.env?.DATABASE_URL) {
+      throw new Error("party.env.DATABASE_URL is undefined");
+    }
+
+    this.db = createDrizzle((party.env.DATABASE_URL as string) ?? "");
   }
 
   onStart() {
@@ -186,7 +195,7 @@ export default class CatMashServer implements Party.Server {
   }
 
   async startFromScratch() {
-    this.updateGameState({ status: "waiting" });
+    this.updateGameState({ status: "initializing" });
 
     setTimeout(() => {
       this.startVotingRound();
@@ -226,15 +235,8 @@ export default class CatMashServer implements Party.Server {
 
     const winner =
       catAVotes > catBVotes ? "a" : catAVotes < catBVotes ? "b" : "tie";
-    // const votesDiff = Math.abs(catAVotes - catBVotes);
 
-    if (winner !== "tie") {
-      // const winnerData = this.gameState.cats[winner];
-      // const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
-      // we don't want to await this so the game can go on
-      // updateCatStats({ winner: winnerData, loser: loserData });
-    }
-
+    // update early, because we don't know how long the db calls will take
     this.updateGameState({
       status: "winner",
       cats: this.gameState.cats,
@@ -245,6 +247,18 @@ export default class CatMashServer implements Party.Server {
     setTimeout(() => {
       this.startVotingRound();
     }, TIMES.WAITING_LENGTH);
+
+    if (winner !== "tie") {
+      const winnerData = this.gameState.cats[winner];
+      const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
+      // we don't want to await this so the game can go on
+      console.log("about to call updateCatStats");
+      await updateCatStats({
+        db: this.db,
+        winner: winnerData,
+        loser: loserData,
+      });
+    }
   }
 
   setError(error: unknown) {
