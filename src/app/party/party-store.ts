@@ -6,7 +6,7 @@ export class Party {
     makeAutoObservable(this);
   }
 
-  gameState: GameState = { status: "waiting" };
+  gameState: GameState = { status: "waiting for initial server connection" };
 
   handleMessage(message: PartykitServerMessage) {
     console.log("handleMessage, message: ", message);

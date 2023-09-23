@@ -4,7 +4,11 @@ import { createContext, useContext } from "react";
 import PartySocket from "partysocket";
 import usePartySocket from "partysocket/react";
 import { party } from "../party/party-store";
-import { PartykitServerMessage } from "@/partykit/server";
+import { PartykitServerMessage } from "@/server/partykit/server";
+
+const PARTY_HOST =
+  process.env.NEXT_PUBLIC_PARTY_HOST ?? "http://127.0.0.1:1999";
+const PARTY_ROOM = "default_room";
 
 interface MultiplayerContextType {
   socket: PartySocket | null;
@@ -18,14 +22,11 @@ export function useMultiplayer() {
   return useContext(MultiplayerContext);
 }
 
-const PARTY_HOST = process.env.PARTY_HOST ?? "http://127.0.0.1:1999";
-const PARTY_ROOM = "hardcoded_room_for_now";
-
 export function MultiplayerContextProvider(props: {
   children: React.ReactNode;
 }) {
   const socket = usePartySocket({
-    host: PARTY_HOST, // TODO: don't hardcode
+    host: PARTY_HOST,
     //party: "youtube-party", // TODO: what does this do?
     room: PARTY_ROOM,
     onMessage: (message) => {

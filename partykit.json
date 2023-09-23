@@ -1,4 +1,4 @@
 {
-    "main": "src/partykit/server.ts",
+    "main": "src/server/partykit/server.ts",
     "name": "cat-mash"
   }

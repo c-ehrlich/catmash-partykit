@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import { useMultiplayer } from "../providers/multiplayer-context";
 import { party } from "./party-store";
 import Image from "next/image";
-import { ValidMessage } from "@/partykit/server";
+import { ValidMessage } from "@/server/partykit/server";
 import { TimeRemaining } from "./time-remaining";
 
 export const CatVoting = observer(function CatVoting() {
@@ -47,7 +47,9 @@ export const CatVoting = observer(function CatVoting() {
             return (
               <div key={catId} className="flex flex-col gap-2">
                 <h2>{catId === "a" ? "Vote for me" : "Nooooo vote for me"}</h2>
-                <Image
+                {/* for the sake of my vercel bill */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={cat.url}
                   alt={`cat-${cat.id}`}
                   width={cat.width}
