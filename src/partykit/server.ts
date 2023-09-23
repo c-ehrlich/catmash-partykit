@@ -25,6 +25,7 @@ const messageSchema = z.discriminatedUnion("type", [
     message: z.string(),
   }),
 ]);
+export type ValidMessage = z.infer<typeof messageSchema>;
 
 type Cat = {
   id: string;
@@ -182,6 +183,8 @@ export default class CatMashServer implements Party.Server {
     cat: "a" | "b";
     userId: string;
   }) {
+    console.log(roundId, cat, userId);
+
     if (
       this.gameStatus.status === "voting" &&
       this.gameStatus.round.id === roundId
@@ -221,6 +224,7 @@ export default class CatMashServer implements Party.Server {
     this.gameStatus = status;
     this._broadcastStatus();
   }
+
   _broadcastStatus() {
     this.party.broadcast(
       JSON.stringify({
@@ -256,7 +260,8 @@ export default class CatMashServer implements Party.Server {
       round: {
         id: crypto.randomUUID(),
         startTime: Date.now(),
-        endTime: Date.now() + TIMES.ROUND_LENGTH,
+        // TODO: maybe dont implement it like this?
+        endTime: Date.now() + TIMES.ROUND_LENGTH - 1000, // -1s to account for network latency
       },
     });
 

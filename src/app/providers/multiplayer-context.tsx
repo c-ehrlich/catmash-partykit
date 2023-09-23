@@ -18,8 +18,8 @@ export function useMultiplayer() {
   return useContext(MultiplayerContext);
 }
 
-const PARTY_HOST = "http://127.0.0.1:1999";
-const PARTY_ROOM = "hardcoded";
+const PARTY_HOST = process.env.PARTY_HOST ?? "http://127.0.0.1:1999";
+const PARTY_ROOM = "hardcoded_room_for_now";
 
 export function MultiplayerContextProvider(props: {
   children: React.ReactNode;

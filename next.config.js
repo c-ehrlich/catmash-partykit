@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // https://cdn2.thecatapi.com/
-    remotePatterns: [{ hostname: "cdn2.thecatapi.com" }],
+    // this api mostly uses `cdn2.thecatapi.com` but it also has a few images on random hosts
+    remotePatterns: [{ hostname: "*" }],
   }
 }
 

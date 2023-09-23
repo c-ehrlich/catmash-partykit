@@ -4,7 +4,7 @@ import { useMultiplayer } from "../providers/multiplayer-context";
 import { observer } from "mobx-react-lite";
 import { party } from "./party-store";
 import { useState } from "react";
-import { ChatMessage } from "@/partykit/server";
+import { ChatMessage, ValidMessage } from "@/partykit/server";
 
 export const Chat = observer(function Chat() {
   const [input, setInput] = useState("");
@@ -27,7 +27,9 @@ export const Chat = observer(function Chat() {
       message: input,
     });
 
-    socket.send(JSON.stringify({ type: "chat", message: input }));
+    const message: ValidMessage = { type: "chat", message: input };
+    socket.send(JSON.stringify(message));
+
     setInput("");
   };
 
