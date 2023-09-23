@@ -32,14 +32,14 @@ type Winner = "a" | "b" | "tie";
 type Round = { id: string; startTime: number; endTime: number };
 
 export type ChatMessage = { id: string; message: string } & (
-  | { type: "chat"; user: string }
+  | { type: "chat"; user: string; location: string }
   | { type: "info" }
 );
 export type ChatMessages = Array<ChatMessage>;
 
 type ChatMessagesServerMessage = { type: "chat"; payload: ChatMessages };
 
-export type GameStatus =
+export type GameState =
   | {
       status: "waiting";
     }
@@ -59,7 +59,7 @@ export type GameStatus =
       error: string;
     };
 
-type GameStatusServerMessage = { type: "status"; payload: GameStatus };
+type GameStatusServerMessage = { type: "status"; payload: GameState };
 
 export type PartykitServerMessage =
   | ChatMessagesServerMessage
@@ -73,7 +73,7 @@ const TIMES = {
 export default class CatMashServer implements Party.Server {
   options: Party.ServerOptions = { hibernate: true };
 
-  gameStatus: GameStatus;
+  gameStatus: GameState;
   chatMessages: ChatMessages;
 
   constructor(readonly party: Party.Party) {
@@ -85,6 +85,11 @@ export default class CatMashServer implements Party.Server {
     this.startFromScratch();
   }
 
+  onRequest(req: Party.Request): Response | Promise<Response> {
+    console.log("onRequest", req.cf?.city);
+    return new Response("Hello, world!", { status: 200 });
+  }
+
   // getConnectionTags(
   //   connection: Party.Connection,
   //   context: Party.ConnectionContext
@@ -92,12 +97,26 @@ export default class CatMashServer implements Party.Server {
 
   onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
     console.log(`onConnect, connection: ${connection}, ctx: ${ctx}`);
+    // TODO: can we use `connection.send` here to send the current status only to the new connection?
+
+    connection.serializeAttachment({
+      ...connection.deserializeAttachment(),
+      city: ctx.request.cf?.city,
+      country: ctx.request.cf?.country,
+    });
+
     this._broadcastStatus();
     this._broadcastChat();
   }
 
-  onMessage(message: string, sender: Party.Connection): void | Promise<void> {
-    console.log(`onMessage, message: ${message}, sender: ${sender}`);
+  onMessage(
+    message: string,
+    connection: Party.Connection
+  ): void | Promise<void> {
+    console.log(`onMessage, message: ${message}, sender: ${connection}`);
+
+    const attachment = connection.deserializeAttachment();
+    console.log("attachment", attachment);
 
     try {
       const parsedMessage = messageSchema.parse(JSON.parse(message as string));
@@ -106,7 +125,7 @@ export default class CatMashServer implements Party.Server {
           this.addVote({
             roundId: parsedMessage.roundId,
             cat: parsedMessage.cat,
-            userId: sender.id,
+            userId: connection.id,
           });
           // TODO: implement
           break;
@@ -114,7 +133,8 @@ export default class CatMashServer implements Party.Server {
           this.addChatMessage({
             id: crypto.randomUUID(),
             type: "chat",
-            user: sender.id,
+            user: connection.id,
+            location: `${attachment.city}, ${attachment.country}`,
             message: parsedMessage.message,
           });
           break;
@@ -125,7 +145,7 @@ export default class CatMashServer implements Party.Server {
   }
 
   onClose(connection: Party.Connection): void | Promise<void> {
-    console.log(`onClose, connection: ${connection}`);
+    // kinda not necessary but whatever
     this.removeVotesForUser(connection.id);
     this._broadcastStatus();
   }
@@ -137,7 +157,14 @@ export default class CatMashServer implements Party.Server {
   }
 
   removeVotesForUser(id: string) {
-    // TODO: implement
+    if (this.gameStatus.status === "voting") {
+      this.updateStatus(
+        produce(this.gameStatus, (draft) => {
+          draft.cats.a.votes = draft.cats.a.votes.filter((vote) => vote !== id);
+          draft.cats.b.votes = draft.cats.b.votes.filter((vote) => vote !== id);
+        })
+      );
+    }
   }
 
   addVote({
@@ -169,9 +196,13 @@ export default class CatMashServer implements Party.Server {
     }
   }
 
-  addChatMessage(message: ChatMessage) {
+  async addChatMessage(message: ChatMessage) {
     // 0th index is most recent
-    this.chatMessages = [message, ...this.chatMessages].slice(0, 10);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // TODO: add a toast telling the user to not say fuck
+    if (!message.message.includes("fuck")) {
+      this.chatMessages = [message, ...this.chatMessages].slice(0, 10);
+    }
     this._broadcastChat();
   }
 
@@ -180,7 +211,7 @@ export default class CatMashServer implements Party.Server {
     this._broadcastChat();
   }
 
-  updateStatus(status: GameStatus) {
+  updateStatus(status: GameState) {
     this.gameStatus = status;
     this._broadcastStatus();
   }
@@ -204,27 +235,59 @@ export default class CatMashServer implements Party.Server {
 
   async startFromScratch() {
     this.updateStatus({ status: "waiting" });
-    try {
-      const cats = await this.getNextRoundCats();
-      const id = crypto.randomUUID();
-      setTimeout(() => {
-        // TODO: extract this into another function and start a timer there
-        this.updateStatus({
-          status: "voting",
-          cats,
-          round: {
-            id,
-            startTime: Date.now(),
-            endTime: Date.now() + TIMES.ROUND_LENGTH,
-          },
-        });
-      }, TIMES.WAITING_LENGTH);
-    } catch (e) {
-      this.setError(e);
-    }
+
+    setTimeout(() => {
+      this.startVotingRound();
+    }, TIMES.WAITING_LENGTH);
   }
 
-  async getNextRoundCats(): Promise<Cats> {
+  async startVotingRound() {
+    const cats = await this.getCatPair();
+
+    this.updateStatus({
+      status: "voting",
+      cats,
+      round: {
+        id: crypto.randomUUID(),
+        startTime: Date.now(),
+        endTime: Date.now() + TIMES.ROUND_LENGTH,
+      },
+    });
+
+    setTimeout(() => {
+      this.showRoundResults();
+    }, TIMES.WAITING_LENGTH);
+  }
+
+  async showRoundResults() {
+    if (this.gameStatus.status !== "voting") {
+      throw new Error("showRoundResults called when not voting");
+    }
+
+    const catAVotes = this.gameStatus.cats.a.votes.length;
+    const catBVotes = this.gameStatus.cats.b.votes.length;
+
+    const winner =
+      catAVotes > catBVotes ? "a" : catAVotes < catBVotes ? "b" : "tie";
+
+    // TODO: persist to db
+    // use id
+    // upsert url
+    // increment votes
+
+    this.updateStatus({
+      status: "winner",
+      cats: this.gameStatus.cats,
+      winner,
+      round: this.gameStatus.round,
+    });
+
+    setTimeout(() => {
+      this.startVotingRound();
+    }, TIMES.WAITING_LENGTH);
+  }
+
+  async getCatPair(): Promise<Cats> {
     const cats = await fetch(
       "https://api.thecatapi.com/v1/images/search?limit=10"
     ).then((res) => res.json());

@@ -17,6 +17,16 @@ export const Chat = observer(function Chat() {
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // optimistic update
+    party.optimisticallyAddMessage({
+      id: Math.random().toString(),
+      user: socket.id,
+      type: "chat",
+      location: "", // not needed because our own location doesn't show
+      message: input,
+    });
+
     socket.send(JSON.stringify({ type: "chat", message: input }));
     setInput("");
   };
@@ -55,7 +65,9 @@ function Message({
     ) : message.user === sessionId ? (
       <span className="text-green-500">You: {message.message}</span>
     ) : (
-      <span>Someone: {message.message}</span>
+      <span>
+        Someone in {message.location}: {message.message}
+      </span>
     );
 
   return <li suppressHydrationWarning>{inner}</li>;
