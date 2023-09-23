@@ -248,11 +248,11 @@ export default class CatMashServer implements Party.Server {
       this.startVotingRound();
     }, TIMES.WAITING_LENGTH);
 
+    // do this now so the game can continue even if this is slow
     if (winner !== "tie") {
       const winnerData = this.gameState.cats[winner];
       const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
-      // we don't want to await this so the game can go on
-      console.log("about to call updateCatStats");
+
       await updateCatStats({
         db: this.db,
         winner: winnerData,
