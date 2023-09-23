@@ -2,9 +2,9 @@ import type * as Party from "partykit/server";
 import { z } from "zod";
 import { produce } from "immer";
 import { getCatPair } from "../util/getCatPair";
-import { db } from "../db/drizzle";
-import { cat } from "../db/schema";
-import { updateCatStats } from "../util/updateCatStats";
+// import { db } from "../db/drizzle";
+// import { cat } from "../db/schema";
+// import { updateCatStats } from "../util/updateCatStats";
 
 const messageSchema = z.discriminatedUnion("type", [
   z.object({
@@ -226,14 +226,13 @@ export default class CatMashServer implements Party.Server {
 
     const winner =
       catAVotes > catBVotes ? "a" : catAVotes < catBVotes ? "b" : "tie";
-    const votesDiff = Math.abs(catAVotes - catBVotes);
+    // const votesDiff = Math.abs(catAVotes - catBVotes);
 
     if (winner !== "tie") {
-      const winnerData = this.gameState.cats[winner];
-      const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
-
+      // const winnerData = this.gameState.cats[winner];
+      // const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
       // we don't want to await this so the game can go on
-      updateCatStats({ winner: winnerData, loser: loserData });
+      // updateCatStats({ winner: winnerData, loser: loserData });
     }
 
     this.updateGameState({

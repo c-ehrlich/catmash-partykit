@@ -30,7 +30,7 @@ export function MultiplayerContextProvider(props: {
     //party: "youtube-party", // TODO: what does this do?
     room: PARTY_ROOM,
     onMessage: (message) => {
-      // todo: maybe safely parse?
+      // TODO: maybe safely parse?
       const parsedMessageData = JSON.parse(message.data);
       party.handleMessage(parsedMessageData as PartykitServerMessage);
     },
