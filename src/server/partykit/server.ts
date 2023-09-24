@@ -80,26 +80,11 @@ export default class CatMashServer implements Party.Server {
     this.startFromScratch();
   }
 
-  onRequest(req: Party.Request): Response | Promise<Response> {
-    console.log("onRequest", req.cf?.city);
+  onRequest(_req: Party.Request): Response | Promise<Response> {
     return new Response("Hello, world!", { status: 200 });
   }
 
-  // getConnectionTags(
-  //   connection: Party.Connection,
-  //   context: Party.ConnectionContext
-  // ): string[] | Promise<string[]> {}
-
-  onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
-    console.log(`onConnect, connection: ${connection}, ctx: ${ctx}`);
-    // TODO: can we use `connection.send` here to send the current status only to the new connection?
-
-    connection.serializeAttachment({
-      ...connection.deserializeAttachment(),
-      city: ctx.request.cf?.city,
-      country: ctx.request.cf?.country,
-    });
-
+  onConnect(_connection: Party.Connection, _ctx: Party.ConnectionContext) {
     this._broadcastGameState();
   }
 
@@ -133,7 +118,7 @@ export default class CatMashServer implements Party.Server {
   }
 
   onError(connection: Party.Connection, error: Error): void | Promise<void> {
-    console.log(`onError, connection: ${connection}, error: ${error}`);
+    console.error(`onError, connection: ${connection}, error: ${error}`);
     this.removeVotesForUser(connection.id);
     this._broadcastGameState();
   }
@@ -158,8 +143,6 @@ export default class CatMashServer implements Party.Server {
     cat: "a" | "b";
     userId: string;
   }) {
-    console.log(roundId, cat, userId);
-
     if (
       this.gameState.status === "voting" &&
       this.gameState.round.id === roundId

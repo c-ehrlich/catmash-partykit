@@ -8,7 +8,7 @@ import * as schema from "../db/schema";
  */
 
 export function createDrizzle(url: string) {
-  console.log("Creating drizzle with url: ", url);
+  console.log("Creating drizzle with url:", url);
 
   return drizzle(new Client({ url: url }).connection(), { schema });
 }

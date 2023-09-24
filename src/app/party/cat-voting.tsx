@@ -19,10 +19,7 @@ const CatVoting = observer(function CatVoting() {
   }
 
   const handleVote = (catId: "a" | "b") => {
-    console.log(catId);
-
     if (party.gameState.status !== "voting") {
-      console.log("wrong game status");
       return;
     }
 

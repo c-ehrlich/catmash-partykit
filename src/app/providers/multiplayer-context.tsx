@@ -36,7 +36,7 @@ export function MultiplayerContextProvider(props: {
     },
   });
 
-  console.log("setting up socket, host:", PARTY_HOST);
+  console.log("opening socket, host:", PARTY_HOST);
 
   return (
     <MultiplayerContext.Provider value={{ socket: socket }}>

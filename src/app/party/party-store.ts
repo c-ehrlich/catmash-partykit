@@ -1,7 +1,7 @@
 import { GameState, PartykitServerMessage } from "@/server/partykit/server";
 import { makeAutoObservable } from "mobx";
 
-export class Party {
+export class CatmashParty {
   constructor() {
     makeAutoObservable(this);
   }
@@ -9,8 +9,6 @@ export class Party {
   gameState: GameState = { status: "waiting for initial server connection" };
 
   handleMessage(message: PartykitServerMessage) {
-    console.log("handleMessage, message: ", message);
-
     switch (message.type) {
       case "gameState":
         this.gameState = message.payload;
@@ -21,4 +19,4 @@ export class Party {
   }
 }
 
-export const party = new Party();
+export const party = new CatmashParty();
