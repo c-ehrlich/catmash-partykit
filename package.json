@@ -22,7 +22,6 @@
     "mobx": "^6.10.2",
     "mobx-react-lite": "^4.0.4",
     "next": "13.5.2",
-    "partykit": "^0.0.20",
     "partysocket": "^0.0.8",
     "postcss": "8.4.30",
     "react": "18.2.0",
@@ -33,6 +32,7 @@
   },
   "devDependencies": {
     "dotenv-cli": "^7.3.0",
-    "drizzle-kit": "^0.19.13"
+    "drizzle-kit": "^0.19.13",
+    "partykit": "^0.0.21"
   }
 }
