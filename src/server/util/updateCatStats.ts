@@ -10,26 +10,27 @@ import * as schema from "../db/schema";
 export async function updateCatStats({
   db,
   winner,
-  loser,
+  otherWinner,
 }: {
   db: PlanetScaleDatabase<typeof schema>;
   winner: Cat;
-  loser: Cat;
+  otherWinner: Cat;
 }) {
-  console.log("updating cat stats");
+  /**
+   * TODO: we're making too many db round trips here. this could be
+   * done faster with transactions.
+   */
 
-  const winnerExists = await db.query.cat.findFirst({
+  const winnerVotesToAdd = winner.votes.length;
+
+  const winnerInDB = await db.query.cat.findFirst({
     where: (cat, { eq }) => eq(cat.id, winner.id),
   });
-  const loserExists = await db.query.cat.findFirst({
-    where: (cat, { eq }) => eq(cat.id, loser.id),
-  });
+  const winnerExistsInDB = !!winnerInDB;
 
-  const votesDiff = winner.votes.length - loser.votes.length;
-
-  console.log(`adding ${votesDiff} votes to ${winner.id}`);
-  if (winnerExists) {
-    db.update(cat).set({ votes: winnerExists.votes + votesDiff });
+  console.log(`adding ${winnerVotesToAdd} votes to ${winner.id}`);
+  if (winnerExistsInDB) {
+    db.update(cat).set({ votes: winnerInDB.votes + winnerVotesToAdd });
   } else {
     db.insert(cat).values({
       id: winner.id,
@@ -38,14 +39,24 @@ export async function updateCatStats({
     });
   }
 
-  console.log(`subtracting ${votesDiff} votes from ${loser.id}}`);
-  if (loserExists) {
-    db.update(cat).set({ votes: loserExists.votes + votesDiff });
+  const otherWinnerVotesToAdd = otherWinner.votes.length;
+
+  const otherWinnerInDB = await db.query.cat.findFirst({
+    where: (cat, { eq }) => eq(cat.id, otherWinner.id),
+  });
+
+  const otherWinnerExistsInDB = !!otherWinnerInDB;
+
+  console.log(`adding ${otherWinnerVotesToAdd} votes to ${otherWinner.id}`);
+  if (otherWinnerExistsInDB) {
+    db.update(cat).set({
+      votes: otherWinnerInDB.votes + otherWinnerVotesToAdd,
+    });
   } else {
     db.insert(cat).values({
-      id: loser.id,
-      url: loser.url,
-      votes: loser.votes.length,
+      id: otherWinner.id,
+      url: otherWinner.url,
+      votes: otherWinner.votes.length,
     });
   }
 }

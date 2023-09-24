@@ -234,12 +234,12 @@ export default class CatMashServer implements Party.Server {
     // do this now so the game can continue even if this is slow
     if (winner !== "tie") {
       const winnerData = this.gameState.cats[winner];
-      const loserData = this.gameState.cats[winner === "a" ? "b" : "a"];
+      const otherWinnerData = this.gameState.cats[winner === "a" ? "b" : "a"];
 
       await updateCatStats({
         db: this.db,
         winner: winnerData,
-        loser: loserData,
+        otherWinner: otherWinnerData,
       });
     }
   }
