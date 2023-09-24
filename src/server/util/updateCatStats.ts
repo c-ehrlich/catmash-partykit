@@ -9,54 +9,69 @@ import * as schema from "../db/schema";
 
 export async function updateCatStats({
   db,
-  winner,
-  otherWinner,
+  cat1,
+  cat2,
 }: {
   db: PlanetScaleDatabase<typeof schema>;
-  winner: Cat;
-  otherWinner: Cat;
+  cat1: Cat;
+  cat2: Cat;
 }) {
   /**
    * TODO: we're making too many db round trips here. this could be
    * done faster with transactions.
    */
 
-  const winnerVotesToAdd = winner.votes.length;
+  const cat1VotesToAdd = cat1.votes.length;
 
-  const winnerInDB = await db.query.cat.findFirst({
-    where: (cat, { eq }) => eq(cat.id, winner.id),
-  });
-  const winnerExistsInDB = !!winnerInDB;
-
-  console.log(`adding ${winnerVotesToAdd} votes to ${winner.id}`);
-  if (winnerExistsInDB) {
-    db.update(cat).set({ votes: winnerInDB.votes + winnerVotesToAdd });
-  } else {
-    db.insert(cat).values({
-      id: winner.id,
-      url: winner.url,
-      votes: winner.votes.length,
+  if (cat1VotesToAdd > 0) {
+    const cat1record = await db.query.cat.findFirst({
+      where: (cat, { eq }) => eq(cat.id, cat1.id),
     });
+    console.log("cat1record", cat1record);
+
+    const cat1ExistsInDB = !!cat1record;
+
+    console.log(`adding ${cat1VotesToAdd} votes to ${cat1.id}`);
+    if (cat1ExistsInDB) {
+      console.log("updating cat1");
+      await db.update(cat).set({ votes: cat1record.votes + cat1VotesToAdd });
+    } else {
+      console.log("creating cat1");
+      await db.insert(cat).values({
+        id: cat1.id,
+        url: cat1.url,
+        votes: cat1.votes.length,
+        height: cat1.height,
+        width: cat1.width,
+      });
+    }
   }
 
-  const otherWinnerVotesToAdd = otherWinner.votes.length;
+  const cat2VotesToAdd = cat2.votes.length;
 
-  const otherWinnerInDB = await db.query.cat.findFirst({
-    where: (cat, { eq }) => eq(cat.id, otherWinner.id),
-  });
-
-  const otherWinnerExistsInDB = !!otherWinnerInDB;
-
-  console.log(`adding ${otherWinnerVotesToAdd} votes to ${otherWinner.id}`);
-  if (otherWinnerExistsInDB) {
-    db.update(cat).set({
-      votes: otherWinnerInDB.votes + otherWinnerVotesToAdd,
+  if (cat2VotesToAdd > 0) {
+    const cat2record = await db.query.cat.findFirst({
+      where: (cat, { eq }) => eq(cat.id, cat2.id),
     });
-  } else {
-    db.insert(cat).values({
-      id: otherWinner.id,
-      url: otherWinner.url,
-      votes: otherWinner.votes.length,
-    });
+    console.log("cat2record", cat2record);
+
+    const cat2ExistsInDB = !!cat2record;
+
+    console.log(`adding ${cat2VotesToAdd} votes to ${cat2.id}`);
+    if (cat2ExistsInDB) {
+      console.log("updating cat2");
+      await db.update(cat).set({
+        votes: cat2record.votes + cat2VotesToAdd,
+      });
+    } else {
+      console.log("creating cat2");
+      await db.insert(cat).values({
+        id: cat2.id,
+        url: cat2.url,
+        votes: cat2.votes.length,
+        height: cat2.height,
+        width: cat2.width,
+      });
+    }
   }
 }

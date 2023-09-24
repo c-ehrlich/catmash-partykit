@@ -97,8 +97,8 @@ const CatVoting = observer(function CatVoting() {
           })}
         </div>
         <span className="flex gap-2 text-sky-600 font-bold">
-          {/* <Link href="/cutest-cats">Cutest Cats</Link> */}
-          {/* <span className="font-light">/</span> */}
+          <Link href="/cutest-cats">Cutest Cats</Link>
+          <span className="font-light">/</span>
           <Link href="/about">About</Link>
         </span>
       </div>

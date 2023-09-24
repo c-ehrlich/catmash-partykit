@@ -73,7 +73,7 @@ export default class CatMashServer implements Party.Server {
       throw new Error("party.env.DATABASE_URL is undefined");
     }
 
-    this.db = createDrizzle((party.env.DATABASE_URL as string) ?? "");
+    this.db = createDrizzle(party.env.DATABASE_URL as string);
   }
 
   onStart() {
@@ -233,16 +233,11 @@ export default class CatMashServer implements Party.Server {
 
     // do this now so the game can continue even if this is slow
     // disable for now so that we don't dangle a millio promises
-    // if (winner !== "tie") {
-    //   const winnerData = this.gameState.cats[winner];
-    //   const otherWinnerData = this.gameState.cats[winner === "a" ? "b" : "a"];
-
-    //   await updateCatStats({
-    //     db: this.db,
-    //     winner: winnerData,
-    //     otherWinner: otherWinnerData,
-    //   });
-    // }
+    await updateCatStats({
+      db: this.db,
+      cat1: this.gameState.cats.a,
+      cat2: this.gameState.cats.b,
+    });
   }
 
   setError(error: unknown) {

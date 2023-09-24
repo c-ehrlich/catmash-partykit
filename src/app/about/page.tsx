@@ -43,7 +43,7 @@ export default async function About() {
           >
             HERE
           </Link>{" "}
-          to view the source code
+          to view the source code (its not good)
         </p>
         <p className="text-xl text-red-700">
           Cat pictures courtesy of{" "}
@@ -62,6 +62,16 @@ export default async function About() {
             height={150}
           />
         </Link>
+        <p className="text-xl text-red-700 text-center">
+          If you can afford it, consider donating to{" "}
+          <Link
+            className="text-green-700 font-bold"
+            href="https://www.cats.org.uk/donate"
+          >
+            Cats Protection
+          </Link>{" "}
+          or any other charity :)
+        </p>
       </div>
     </div>
   );
