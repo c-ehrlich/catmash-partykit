@@ -2,6 +2,7 @@ import { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
 import { cat } from "../db/schema";
 import { type Cat } from "../partykit/server";
 import * as schema from "../db/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * TODO: this doesn't work for some reason, it just stops at the first db query
@@ -34,7 +35,10 @@ export async function updateCatStats({
     console.log(`adding ${cat1VotesToAdd} votes to ${cat1.id}`);
     if (cat1ExistsInDB) {
       console.log("updating cat1");
-      await db.update(cat).set({ votes: cat1record.votes + cat1VotesToAdd });
+      await db
+        .update(cat)
+        .set({ votes: cat1record.votes + cat1VotesToAdd })
+        .where(eq(cat.id, cat1.id));
     } else {
       console.log("creating cat1");
       await db.insert(cat).values({
@@ -60,9 +64,10 @@ export async function updateCatStats({
     console.log(`adding ${cat2VotesToAdd} votes to ${cat2.id}`);
     if (cat2ExistsInDB) {
       console.log("updating cat2");
-      await db.update(cat).set({
-        votes: cat2record.votes + cat2VotesToAdd,
-      });
+      await db
+        .update(cat)
+        .set({ votes: cat2record.votes + cat2VotesToAdd })
+        .where(eq(cat.id, cat2.id));
     } else {
       console.log("creating cat2");
       await db.insert(cat).values({
