@@ -17,5 +17,15 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  cursor: url("/cursor/cat2.gif"), pointer;
+}
+
+a,
+button {
+  cursor: url("/cursor/cat1.gif"), pointer;
+}
+
+.catbg {
+  background-image: url("/img/catbg.jpg");
+  background-repeat: repeat;
 }

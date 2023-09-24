@@ -13,12 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className="flex flex-col items-center justify-center w-screen h-screen overflow-scroll py-8 bg-green-400 relative"
-    >
+    <html lang="en">
       <MultiplayerContextProvider>
-        <body className="flex flex-col items-center">{children}</body>
+        <body className="flex flex-col items-center justify-center w-screen h-screen overflow-scroll py-8 bg-green-400 relative">
+          {children}
+        </body>
       </MultiplayerContextProvider>
     </html>
   );
