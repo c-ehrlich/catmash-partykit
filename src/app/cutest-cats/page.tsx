@@ -26,7 +26,7 @@ export default async function CutestCats() {
       {cats.map((cat, idx) => (
         <div key={cat.id} className="flex flex-col">
           <p>
-            Rank {idx + 1} with {cat.votes} votes
+            Rank {idx + 1} with {cat.votes} vote{cat.votes !== 1 && "s"}
           </p>
           <img
             src={cat.url}
