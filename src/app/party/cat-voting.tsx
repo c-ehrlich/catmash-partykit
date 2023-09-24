@@ -149,7 +149,15 @@ const CatVoting = observer(function CatVoting() {
     );
   }
 
-  return <div>Invalid game state {JSON.stringify(party.gameState)}</div>;
+  if (party.gameState.status === "initializing") {
+    return (
+      <h1 className="text-5xl font-bold text-red-600 text-center">
+        Get ready to look at some cats!!
+      </h1>
+    );
+  }
+
+  return <div>Unhandled game state {JSON.stringify(party.gameState)}</div>;
 });
 
 export default CatVoting;
