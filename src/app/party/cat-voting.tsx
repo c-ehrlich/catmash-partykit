@@ -98,8 +98,8 @@ const CatVoting = observer(function CatVoting() {
         </div>
         <span className="flex gap-2 text-sky-600 font-bold">
           <Link href="/cutest-cats">Cutest Cats</Link>
-          <span className="font-light">/</span>
-          <Link href="/about">About</Link>
+          {/* <span className="font-light">/</span> */}
+          {/* <Link href="/about">About</Link> */}
         </span>
       </div>
     );
@@ -111,7 +111,12 @@ const CatVoting = observer(function CatVoting() {
       party.gameState.cats.b.votes.length
     ) {
       return (
-        <h1 className="text-red-500 text-4xl font-bold">It&rsquo;s a tie!</h1>
+        <div className="flex flex-col gap-4 items-center">
+          <h1 className="text-red-500 text-4xl font-bold">It&rsquo;s a tie!</h1>
+          <h2 className="text-2xl font-bold font-serif text-pink-600">
+            Congratulations to both cats
+          </h2>
+        </div>
       );
     }
 
