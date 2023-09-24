@@ -6,7 +6,6 @@
 import { observer } from "mobx-react-lite";
 import { useMultiplayer } from "../providers/multiplayer-context";
 import { party } from "./party-store";
-import Image from "next/image";
 import { ValidMessage } from "@/server/partykit/server";
 import { TimeRemaining } from "./time-remaining";
 import Link from "next/link";
@@ -111,8 +110,9 @@ const CatVoting = observer(function CatVoting() {
       party.gameState.cats.a.votes.length ===
       party.gameState.cats.b.votes.length
     ) {
-      // TODO: show when the next round starts
-      return <h1>Its a tie!</h1>;
+      return (
+        <h1 className="text-red-500 text-4xl font-bold">It&rsquo;s a tie!</h1>
+      );
     }
 
     const winner =
@@ -129,12 +129,19 @@ const CatVoting = observer(function CatVoting() {
         <h1 className="text-5xl font-bold text-red-600 text-center">
           Winner Winner Chicken Dinner
         </h1>
-        <Image
-          src={winner.url}
-          alt={`cat-${winner.id}`}
-          width={winner.width}
-          height={winner.height}
-        />
+        <div className="flex flex-col gap-4 items-center p-4 bg-green-500 rounded-lg w-full max-w-md">
+          <div className="flex items-center justify-center aspect-square w-full bg-transparent rounded-md overflow-hidden">
+            <div className="flex align-center items-center w-full h-full">
+              <img
+                className="object-fill rounded-md"
+                src={winner.url}
+                alt={`cat-${winner.id}`}
+                width={winner.width}
+                height={winner.height}
+              />
+            </div>
+          </div>
+        </div>
         <p className="text-center font-bold text-blue-800 text-xl">
           Won {winner.votes.length}:{loser.votes.length}
         </p>
@@ -142,7 +149,7 @@ const CatVoting = observer(function CatVoting() {
     );
   }
 
-  return <div>{JSON.stringify(party.gameState)}</div>;
+  return <div>Invalid game state {JSON.stringify(party.gameState)}</div>;
 });
 
 export default CatVoting;
