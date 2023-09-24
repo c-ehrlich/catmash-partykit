@@ -6,7 +6,7 @@ import { cat } from "@/server/db/schema";
 import { desc } from "drizzle-orm";
 
 export const runtime = "edge";
-export const dynamic = "force-dynamic";
+export const revalidate = 60 * 5; // 5 minutes
 
 export default async function CutestCats() {
   if (!process.env.DATABASE_URL) {
