@@ -1,4 +1,9 @@
 {
   "main": "src/server/partykit/server.ts",
-  "name": "cat-mash"
+  "name": "cat-mash",
+  "define": {
+    "___comment": "\"see here why we're doing this: https://discord.com/channels/1051830863576453180/1104146566303977553/1156004133359321098\"",
+    "__global": "{ \"process\": { \"env\": {}}}",
+    "__window": "{}"
+  }
 }

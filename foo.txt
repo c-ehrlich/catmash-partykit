@@ -1,0 +1,9 @@
+{
+  "name": "cat-mash",
+  "vars": {
+    "DATABASE_URL": "mysql://bpacukbhljesr0jrod5j:pscale_pw_s010xFtAn1enKVmTCovuEpJaZ5WkDeNZ5SVy6SCFv5Z@aws.connect.psdb.cloud/projects?ssl={\"rejectUnauthorized\":true}",
+    "AXIOM_DATASET": "asdf",
+    "AXIOM_TOKEN": "xaat-20d4ee8b-8a26-465d-bb41-f705a9e4e495",
+    "AXIOM_ORG_ID": "cje-test-ria5"
+  }
+}

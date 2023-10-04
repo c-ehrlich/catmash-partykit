@@ -10,6 +10,7 @@
     "db:push": "dotenv drizzle-kit push:mysql"
   },
   "dependencies": {
+    "@axiomhq/js": "^0.1.3",
     "@planetscale/database": "^1.11.0",
     "@types/node": "20.6.3",
     "@types/react": "18.2.22",

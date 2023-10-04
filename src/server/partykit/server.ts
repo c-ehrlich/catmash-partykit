@@ -6,6 +6,7 @@ import { PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
 import * as schema from "../db/schema";
 import { updateCatStats } from "../util/updateCatStats";
 import { createDrizzle } from "../db/drizzle";
+import { AxiomLogger } from "../util/axiom";
 
 const messageSchema = z.discriminatedUnion("type", [
   z.object({
@@ -66,12 +67,22 @@ export default class CatMashServer implements Party.Server {
 
   db: PlanetScaleDatabase<typeof schema>;
 
+  axiom: AxiomLogger;
+
   constructor(readonly party: Party.Party) {
     this.gameState = { status: "initializing" };
 
     if (!party.env?.DATABASE_URL) {
       throw new Error("party.env.DATABASE_URL is undefined");
     }
+
+    console.log("env", party.env);
+
+    this.axiom = new AxiomLogger({
+      dataset: party.env.AXIOM_DATASET as string,
+      token: party.env.AXIOM_TOKEN as string,
+      orgId: party.env.AXIOM_ORG_ID as string,
+    });
 
     this.db = createDrizzle(party.env.DATABASE_URL as string);
   }
@@ -84,8 +95,13 @@ export default class CatMashServer implements Party.Server {
     return new Response("Hello, world!", { status: 200 });
   }
 
-  onConnect(_connection: Party.Connection, _ctx: Party.ConnectionContext) {
+  onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
     this._broadcastGameState();
+
+    connection.serializeAttachment({
+      ...connection.deserializeAttachment(),
+      cf: ctx.request.cf,
+    });
   }
 
   onMessage(
@@ -93,7 +109,15 @@ export default class CatMashServer implements Party.Server {
     connection: Party.Connection
   ): void | Promise<void> {
     try {
-      const parsedMessage = messageSchema.parse(JSON.parse(message as string));
+      const parsedMessage = messageSchema.parse(JSON.parse(message));
+
+      console.log("attachment:", connection.deserializeAttachment());
+      this.axiom.log({
+        message: parsedMessage,
+        connectionId: connection.id,
+        cf: connection.deserializeAttachment().cf,
+      });
+
       switch (parsedMessage.type) {
         case "vote":
           this.addVote({
