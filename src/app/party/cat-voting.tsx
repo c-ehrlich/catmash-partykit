@@ -36,7 +36,7 @@ const CatVoting = observer(function CatVoting() {
 
     const endTime = party.gameState.round.endTime;
     const totalVotes = cats.a.votes.length + cats.b.votes.length;
-    const connections = party.gameState.connections;
+    const connections = party.connections;
 
     const playerHasVotes =
       cats.a.votes.includes(socket.id) || cats.b.votes.includes(socket.id);
