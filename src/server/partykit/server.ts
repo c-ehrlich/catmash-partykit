@@ -64,6 +64,10 @@ const TIMES = {
   WAITING_LENGTH: 5_000,
 } as const;
 
+type Connection = Party.Connection<{
+  cf: Party.ConnectionContext["request"]["cf"];
+}>;
+
 export default class CatMashServer implements Party.Server {
   options: Party.ServerOptions = { hibernate: true };
 
@@ -97,29 +101,21 @@ export default class CatMashServer implements Party.Server {
     return new Response("Hello, world!", { status: 200 });
   }
 
-  onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
+  onConnect(connection: Connection, ctx: Party.ConnectionContext) {
     this.updateGameState({ ...this.gameState, connections: this.connections });
     this._broadcastGameState();
 
-    // TODO: use connection.state instead - https://github.com/partykit/partykit/releases/tag/partykit%400.0.27
-    connection.serializeAttachment({
-      ...connection.deserializeAttachment(),
-      cf: ctx.request.cf,
-    });
+    connection.setState({ cf: ctx.request.cf });
   }
 
-  onMessage(
-    message: string,
-    connection: Party.Connection
-  ): void | Promise<void> {
+  onMessage(message: string, connection: Connection): void | Promise<void> {
     try {
       const parsedMessage = messageSchema.parse(JSON.parse(message));
 
-      console.log("attachment:", connection.deserializeAttachment());
       this.axiom.log({
         message: parsedMessage,
         connectionId: connection.id,
-        cf: connection.deserializeAttachment().cf,
+        cf: connection.state?.cf,
       });
 
       switch (parsedMessage.type) {
@@ -139,13 +135,13 @@ export default class CatMashServer implements Party.Server {
     }
   }
 
-  onClose(connection: Party.Connection): void | Promise<void> {
+  onClose(connection: Connection): void | Promise<void> {
     // kinda not necessary but whatever
     this.removeVotesForUser(connection.id);
     this._broadcastGameState();
   }
 
-  onError(connection: Party.Connection, error: Error): void | Promise<void> {
+  onError(connection: Connection, error: Error): void | Promise<void> {
     console.error(`onError, connection: ${connection}, error: ${error}`);
     this.removeVotesForUser(connection.id);
     this._broadcastGameState();

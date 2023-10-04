@@ -34,6 +34,6 @@
   "devDependencies": {
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.19.13",
-    "partykit": "^0.0.21"
+    "partykit": "^0.0.27"
   }
 }
