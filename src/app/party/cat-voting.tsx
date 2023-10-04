@@ -36,6 +36,7 @@ const CatVoting = observer(function CatVoting() {
 
     const endTime = party.gameState.round.endTime;
     const totalVotes = cats.a.votes.length + cats.b.votes.length;
+    const connections = party.gameState.connections;
 
     const playerHasVotes =
       cats.a.votes.includes(socket.id) || cats.b.votes.includes(socket.id);
@@ -54,7 +55,11 @@ const CatVoting = observer(function CatVoting() {
           Which cat is cuter?
         </h1>
 
-        <TimeRemaining endTime={endTime} totalVotes={totalVotes} />
+        <TimeRemaining
+          connections={connections}
+          endTime={endTime}
+          totalVotes={totalVotes}
+        />
 
         <div className="flex flex-col md:flex-row gap-4 items-center justify-center w-full">
           {(["a", "b"] as const).map((catId) => {

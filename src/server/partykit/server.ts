@@ -29,7 +29,10 @@ export type Cats = Record<"a" | "b", Cat>;
 type Winner = "a" | "b" | "tie";
 type Round = { id: string; startTime: number; endTime: number };
 
-export type GameState =
+export type GameState = {
+  // TODO: move connections to its own thing so we only need to pass them on player connect/disconnect
+  connections: number;
+} & (
   | { status: "waiting for initial server connection" }
   | {
       status: "initializing";
@@ -48,7 +51,8 @@ export type GameState =
   | {
       status: "error";
       error: string;
-    };
+    }
+);
 
 type GameStateServerMessage = { type: "gameState"; payload: GameState };
 
@@ -70,7 +74,7 @@ export default class CatMashServer implements Party.Server {
   axiom: AxiomLogger;
 
   constructor(readonly party: Party.Party) {
-    this.gameState = { status: "initializing" };
+    this.gameState = { status: "initializing", connections: 0 };
 
     if (!party.env?.DATABASE_URL) {
       throw new Error("party.env.DATABASE_URL is undefined");
@@ -96,6 +100,7 @@ export default class CatMashServer implements Party.Server {
   }
 
   onConnect(connection: Party.Connection, ctx: Party.ConnectionContext) {
+    this.updateGameState({ ...this.gameState, connections: this.connections });
     this._broadcastGameState();
 
     connection.serializeAttachment({
@@ -189,6 +194,7 @@ export default class CatMashServer implements Party.Server {
 
   updateGameState(status: GameState) {
     this.gameState = status;
+    console.log("status", status);
     this._broadcastGameState();
   }
 
@@ -202,11 +208,18 @@ export default class CatMashServer implements Party.Server {
   }
 
   async startFromScratch() {
-    this.updateGameState({ status: "initializing" });
+    this.updateGameState({
+      status: "initializing",
+      connections: this.connections,
+    });
 
     setTimeout(() => {
       this.startVotingRound();
     }, TIMES.WAITING_LENGTH);
+  }
+
+  get connections() {
+    return Array.from(this.party.getConnections()).length;
   }
 
   async startVotingRound() {
@@ -222,6 +235,7 @@ export default class CatMashServer implements Party.Server {
           // TODO: maybe dont implement it like this?
           endTime: Date.now() + TIMES.ROUND_LENGTH - 1000, // -1s to account for network latency
         },
+        connections: this.connections,
       });
 
       setTimeout(() => {
@@ -249,6 +263,7 @@ export default class CatMashServer implements Party.Server {
       cats: this.gameState.cats,
       winner,
       round: this.gameState.round,
+      connections: this.connections,
     });
 
     setTimeout(() => {
@@ -268,6 +283,7 @@ export default class CatMashServer implements Party.Server {
     this.gameState = {
       status: "error",
       error: error instanceof Error ? error.message : "unknown error",
+      connections: this.connections,
     };
     setTimeout(() => {
       this.startFromScratch();

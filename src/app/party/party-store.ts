@@ -11,11 +11,15 @@ export class CatmashParty {
     makeAutoObservable(this);
   }
 
-  gameState: GameState = { status: "waiting for initial server connection" };
+  gameState: GameState = {
+    status: "waiting for initial server connection",
+    connections: 0,
+  };
 
   handleMessage(message: PartykitServerMessage) {
     switch (message.type) {
       case "gameState":
+        console.log(message.payload);
         this.gameState = message.payload;
         break;
       default:

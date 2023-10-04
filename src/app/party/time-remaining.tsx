@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 export function TimeRemaining({
+  connections,
   endTime,
   totalVotes,
 }: {
+  connections: number;
   endTime: number;
   totalVotes: number;
 }) {
@@ -27,8 +29,9 @@ export function TimeRemaining({
 
   return (
     <p className="text-purple-600 text-xl text-bold">
-      {totalVotes} vote{totalVotes !== 1 && "s"}. {secondsRemaining} seconds
-      remaining.
+      {connections ?? 0} player{connections !== 1 && "s"} online. {totalVotes}{" "}
+      vote
+      {totalVotes !== 1 && "s"}. {secondsRemaining} seconds remaining.
     </p>
   );
 }
