@@ -80,8 +80,6 @@ export default class CatMashServer implements Party.Server {
       throw new Error("party.env.DATABASE_URL is undefined");
     }
 
-    console.log("env", party.env);
-
     this.axiom = new AxiomLogger({
       dataset: party.env.AXIOM_DATASET as string,
       token: party.env.AXIOM_TOKEN as string,
@@ -103,6 +101,7 @@ export default class CatMashServer implements Party.Server {
     this.updateGameState({ ...this.gameState, connections: this.connections });
     this._broadcastGameState();
 
+    // TODO: use connection.state instead - https://github.com/partykit/partykit/releases/tag/partykit%400.0.27
     connection.serializeAttachment({
       ...connection.deserializeAttachment(),
       cf: ctx.request.cf,
